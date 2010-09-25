@@ -68,4 +68,5 @@ submission () {
 }
 
 authentication
+[ -e "${HOME}/.moc/last_song" ] && . "${HOME}/.moc/last_song" && submission && rm "${HOME}/.moc/last_song"
 now_playing_notification
