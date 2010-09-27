@@ -1,7 +1,11 @@
 #!/bin/bash
 
-die () {
+error () {
     echo -e "\e[31;1mERROR:\e[0m ${1}" >&2
+}
+
+die () {
+    error "$@"
     exit 1
 }
 
@@ -14,7 +18,7 @@ alert () {
 
 TIMESTAMP="$(date --utc +%s)"
 
-CLIENT_NAME="tst"
+CLIENT_NAME="bss"
 CLIENT_VERSION="1.0"
 
 url_encode () {
@@ -63,10 +67,10 @@ now_playing_notification () {
 submission () {
     alert "Submitting..."
     local RES="$(wget -O - --post-data="s=${SESSID}&a%5B0%5D=$(url_encode "${ARTIST}")&t%5B0%5D=$(url_encode "${TRACK}")&i%5B0%5D=${TIMESTAMP}&o%5B0%5D=P&r%5B0%5D=L&l%5B0%5D=${DURATION}&b%5B0%5D=$(url_encode "${ALBUM}")&n%5B0%5D=&m%5B0%5D=" "${SUBMISSION_URL}" 2>/dev/null)"
-    [ "${RES}" == "OK" ] || die "${RES}"
+    [ "${RES}" == "OK" ] || error "${RES}"
     alert "Submitted."
 }
 
 authentication
-[ -e "${HOME}/.moc/last_song" ] && . "${HOME}/.moc/last_song" && submission && rm "${HOME}/.moc/last_song"
+[ -e "${HOME}/.moc/last_song" ] && . "${HOME}/.moc/last_song" && rm "${HOME}/.moc/last_song" && submission
 now_playing_notification
