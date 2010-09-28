@@ -22,9 +22,15 @@ CLIENT_NAME="bss"
 CLIENT_VERSION="1.0"
 
 url_encode () {
-    echo -n "${1}" | sed -e's/./&\n/g' -e's/ /%20/g' | grep -v '^$' | while read CHAR; do test "${CHAR}" = "%20" && echo "${CHAR}" ||\
-        echo "${CHAR}" | grep -E '[-[:alnum:]!*.'"'"'()]|\[|\]' || echo -n "${CHAR}" | od -t x1 | tr ' ' '\n' | grep '^[[:alnum:]]\{2\}$' |\
-        tr '[a-z]' '[A-Z]' | sed -e's/^/%/g'; done | sed -e's/%20/+/g' | tr -d '\n'
+    echo -n "${1}" | sed -r '$!N;s/ /%20/g;s/\n/%0a/g;s/(%(20|0a)|.)/&\n/g' |\
+    while read CHAR; do
+        echo -n "${CHAR}" | grep -Po '^([[:alnum:];/:@$,\-_\.!~\*'\''\(\)]|%[[:xdigit:]]{2})$' ||\
+        echo -n "${CHAR}" | od -t x1 -w1 | head -n1 | sed -r 's/^[0-9]+?\s+//; s/^/%/'
+    done | tr -d '\n'
+}
+
+shell_escape () {
+    echo -n "${1}" | sed -r 's/(["\$`\\])/\\\1/g'
 }
 
 md5 () {
@@ -52,7 +58,7 @@ get_moc_infos () {
     TRACK="$(echo "${INFOS}" | head -n2 | tail -n1)"
     ALBUM="$(echo "${INFOS}" | tail -n2 | head -n1)"
     DURATION="$(echo "${INFOS}" | tail -n1)"
-    echo -ne "ARTIST=\"${ARTIST}\"\nTRACK=\"${TRACK}\"\nALBUM=\"${ALBUM}\"\nDURATION=\"${DURATION}\"" > "${HOME}/.moc/last_song"
+    echo -ne "ARTIST=\"$(shell_escape "${ARTIST}")\"\nTRACK=\"$(shell_escape "${TRACK}")\"\nALBUM=\"$(shell_escape "${ALBUM}")\"\nDURATION=\"$(shell_escape ${DURATION})\"" > "${HOME}/.moc/last_song"
     alert "Infos taken."
 }
 
