@@ -19,13 +19,13 @@ alert () {
 TIMESTAMP="$(date --utc +%s)"
 
 CLIENT_NAME="bss"
-CLIENT_VERSION="1.0"
+CLIENT_VERSION="1.0.1"
 
 url_encode () {
-    echo -n "${1}" | sed -r '$!N;s/ /%20/g;s/\n/%0a/g;s/(%(20|0a)|.)/&\n/g' |\
+    print -- "${1}" | sed -r '$!N;s/ /%20/g;s/\n/%0a/g;s/(%(20|0a)|.)/&\n/g' |\
     while read CHAR; do
-        echo -n "${CHAR}" | grep -Po '^([[:alnum:];/:@$,\-_\.!~\*'\''\(\)]|%[[:xdigit:]]{2})$' ||\
-        echo -n "${CHAR}" | od -t x1 -w1 | head -n1 | sed -r 's/^[0-9]+?\s+//; s/^/%/'
+        print -- "${CHAR}" | grep -Po '^([[:alnum:];/:@$,\-_\.!~\*'\''\(\)]|%[[:xdigit:]]{2})$' ||\
+        print -- "${CHAR}" | od -t x1 -w1 | head -n1 | sed -r 's/^[0-9]+?\s+//; s/^/%/'
     done | tr -d '\n'
 }
 
